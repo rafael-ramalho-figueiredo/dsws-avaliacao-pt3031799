@@ -1,0 +1,29 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Flasky{% endblock %}
+
+{% block head %}
+{{ super() }}
+{% endblock %}
+
+{% block page_content %}
+<div class="container page-header">
+    <h1 class="ml-2 mt-5">Avaliação semestral</h1>
+    <h4 class="ml-2">Aluno: Rafael Ramalho Figueiredo</h4>
+    <h4 class="ml-2">Prontuário: PT3031799</h4>
+</div>
+
+
+
+<div class="container ">
+    <hr/>
+    <p class="ml-2">A data e hora local é {{moment(current_time).format('LLL') }}</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{{ moment.include_moment() }}
+{% endblock %}
+base.html

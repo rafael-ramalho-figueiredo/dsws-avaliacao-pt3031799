@@ -1,32 +1,34 @@
 import os
-import click
-from flask_migrate import Migrate
-from app import create_app, db
-from app.models import User, Role
-from dotenv import load_dotenv
+from flask import Flask, request, redirect, render_template, url_for
+from flask_bootstrap import Bootstrap
+from datetime import datetime
+from flask_moment import Moment
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField, RadioField
+from wtforms.validators import DataRequired
 
-project_folder = os.path.expanduser('~/flask')
-load_dotenv(os.path.join(project_folder, '.env'))
-app = create_app(os.getenv('FLASK_CONFIG') or 'default')
-migrate = Migrate(app, db)
+basedir = os.path.abspath(os.path.dirname(__file__))
+app = Flask(__name__)
+bootstrap = Bootstrap(app)
+moment = Moment(app)
+app.config['SECRET_KEY'] = 'PTDSWS'
 
-app.config['API_KEY'] = os.environ.get('API_KEY')
-app.config['API_URL'] = os.environ.get('API_URL')
-app.config['API_FROM'] = os.environ.get('API_FROM')
-app.config['FLASKY_MAIL_SUBJECT_PREFIX'] = '[Flasky]'
-app.config['FLASKY_ADMIN'] = os.environ.get('FLASKY_ADMIN')
+class Disciplina(FlaskForm):
+    name = StringField('Cadastre a nova disciplina e o semestre associado:', validators=[DataRequired()])
+    semester = RadioField('', choices=[('option1', '1º semestre'), ('option2', '2º semestre'), ('option3', '3º semestre'), ('option4', '4º semestre'), ('option5', '5º semestre'), ('option6', '6º semestre')])
+    submit = SubmitField('Cadastrar')
 
-@app.shell_context_processor
-def make_shell_context():
-    return dict(db=db, User=User, Role=Role)
+@app.route('/')
+def index():
+    return render_template('index.html', current_time=datetime.utcnow())
 
-@app.cli.command()
-@click.argument('test_names', nargs=-1)
-def test(test_names):
-    """Run the unit tests."""
-    import unittest
-    if test_names:
-        tests = unittest.TestLoader().loadTestsFromNames(test_names)
-    else:
-        tests = unittest.TestLoader().discover('tests')
-    unittest.TextTestRunner(verbosity=2).run(tests)
+@app.route('/disciplinas', methods=['GET', 'POST'])
+def disciplinas():
+    form = Disciplina()
+    if request.method == 'POST' and form.validate():
+        return redirect(url_for('disciplinas'))
+    return render_template('disciplinas.html', form=form)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
